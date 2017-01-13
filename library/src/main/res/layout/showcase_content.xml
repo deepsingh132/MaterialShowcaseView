@@ -8,10 +8,11 @@
     android:padding="16dp">
 
     <ImageView
-        android:id="@+id/iv_hand"
+        android:id="@+id/iv_action"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/swipe_hand_add_money"
+        android:visibility="gone"
         android:layout_margin="20dp"/>
 
     <TextView
@@ -21,6 +22,7 @@
         android:textColor="@android:color/white"
         android:paddingLeft="5dp"
         android:textSize="30dp"
+        android:visibility="gone"
         android:layout_marginBottom="15dp" />
 
     <TextView
@@ -28,6 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@android:color/white"
+        android:visibility="gone"
         android:paddingLeft="5dp"
         android:textSize="20dp" />
 

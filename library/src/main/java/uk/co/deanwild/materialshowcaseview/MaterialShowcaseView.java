@@ -58,7 +58,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private TextView mTitleTextView;
     private TextView mContentTextView;
     private TextView mDismissButton;
-    private ImageView mHandImage;
+    private ImageView mActionIcon;
     private int mGravity;
     private int mContentBottomMargin;
     private int mContentTopMargin;
@@ -128,7 +128,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         mTitleTextView = (TextView) contentView.findViewById(R.id.tv_title);
         mContentTextView = (TextView) contentView.findViewById(R.id.tv_content);
         mDismissButton = (TextView) contentView.findViewById(R.id.tv_dismiss);
-        mHandImage = (ImageView) contentView.findViewById(R.id.iv_hand);
+        mActionIcon = (ImageView) contentView.findViewById(R.id.iv_action);
         mDismissButton.setOnClickListener(this);
     }
 
@@ -307,7 +307,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
                 mContentTopMargin = yPos;
                 mContentBottomMargin = 0;
                 mContentLeftMargin = xPos - targetBounds.width()/2;
-                mGravity = Gravity.BOTTOM;
+                mGravity = Gravity.TOP;
             } else {
                 if (yPos > midPoint) {
                     // target is in lower half of screen, we'll sit above it
@@ -378,13 +378,19 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
 
     private void setTitleText(CharSequence contentText) {
         if (mTitleTextView != null && !contentText.equals("")) {
+            mTitleTextView.setVisibility(VISIBLE);
             mContentTextView.setAlpha(0.5F);
             mTitleTextView.setText(contentText);
         }
     }
 
+    private void showActionIcon(boolean value) {
+        mActionIcon.setVisibility(value ? VISIBLE : GONE);
+    }
+
     private void setContentText(CharSequence contentText) {
-        if (mContentTextView != null) {
+        if (mContentTextView != null && !contentText.equals("")) {
+            mContentTextView.setVisibility(VISIBLE);
             mContentTextView.setText(contentText);
         }
     }
@@ -686,6 +692,11 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
 
         public Builder shouldContentStartFromTargetCenter(boolean value) {
             showcaseView.shouldContentStartFromTargetCenter(value);
+            return this;
+        }
+
+        public Builder showActionIcon(boolean value) {
+            showcaseView.showActionIcon(value);
             return this;
         }
 
