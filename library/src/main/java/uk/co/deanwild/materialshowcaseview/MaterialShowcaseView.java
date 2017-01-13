@@ -62,6 +62,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private int mGravity;
     private int mContentBottomMargin;
     private int mContentTopMargin;
+    private int mContentLeftMargin;
     private boolean mDismissOnTouch = false;
     private boolean mShouldRender = false; // flag to decide when we should actually render
     private boolean mRenderOverNav = false;
@@ -293,6 +294,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             int height = getMeasuredHeight();
             int midPoint = height / 2;
             int yPos = targetPoint.y;
+            int xPos = targetPoint.x;
 
             int radius = Math.max(targetBounds.height(), targetBounds.width()) / 2;
             if (mShape != null) {
@@ -304,17 +306,20 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
                 //content should start from the center of target. So we just need to set the upper margin.
                 mContentTopMargin = yPos;
                 mContentBottomMargin = 0;
+                mContentLeftMargin = xPos - targetBounds.width()/2;
                 mGravity = Gravity.BOTTOM;
             } else {
                 if (yPos > midPoint) {
                     // target is in lower half of screen, we'll sit above it
                     mContentTopMargin = 0;
                     mContentBottomMargin = (height - yPos) + radius + mShapePadding;
+                    mContentLeftMargin = 0;
                     mGravity = Gravity.BOTTOM;
                 } else {
                     // target is in upper half of screen, we'll sit below it
                     mContentTopMargin = yPos + radius + mShapePadding;
                     mContentBottomMargin = 0;
+                    mContentLeftMargin = 0;
                     mGravity = Gravity.TOP;
                 }
             }
@@ -337,6 +342,11 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
 
             if (contentLP.topMargin != mContentTopMargin) {
                 contentLP.topMargin = mContentTopMargin;
+                layoutParamsChanged = true;
+            }
+
+            if (contentLP.leftMargin != mContentLeftMargin) {
+                contentLP.leftMargin = mContentLeftMargin;
                 layoutParamsChanged = true;
             }
 
