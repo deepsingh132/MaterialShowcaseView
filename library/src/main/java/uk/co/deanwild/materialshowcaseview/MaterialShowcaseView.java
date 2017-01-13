@@ -65,6 +65,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private boolean mDismissOnTouch = false;
     private boolean mShouldRender = false; // flag to decide when we should actually render
     private boolean mRenderOverNav = false;
+    private boolean mContentStartFromTargetCenter = false; // flag to decide if content should start from the center of target
     private int mMaskColour;
     private AnimationFactory mAnimationFactory;
     private boolean mShouldAnimate = true;
@@ -288,7 +289,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             Rect targetBounds = mTarget.getBounds();
             setPosition(targetPoint);
 
-            // now figure out whether to put content above or below it
+            // now figure out whether to put content above or below it, OR at the center
             int height = getMeasuredHeight();
             int midPoint = height / 2;
             int yPos = targetPoint.y;
@@ -299,16 +300,23 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
                 radius = mShape.getHeight() / 2;
             }
 
-            if (yPos > midPoint) {
-                // target is in lower half of screen, we'll sit above it
-                mContentTopMargin = 0;
-                mContentBottomMargin = (height - yPos) + radius + mShapePadding;
+            if (mContentStartFromTargetCenter) {
+                //content should start from the center of target. So we just need to set the upper margin.
+                mContentTopMargin = yPos;
+                mContentBottomMargin = 0;
                 mGravity = Gravity.BOTTOM;
             } else {
-                // target is in upper half of screen, we'll sit below it
-                mContentTopMargin = yPos + radius + mShapePadding;
-                mContentBottomMargin = 0;
-                mGravity = Gravity.TOP;
+                if (yPos > midPoint) {
+                    // target is in lower half of screen, we'll sit above it
+                    mContentTopMargin = 0;
+                    mContentBottomMargin = (height - yPos) + radius + mShapePadding;
+                    mGravity = Gravity.BOTTOM;
+                } else {
+                    // target is in upper half of screen, we'll sit below it
+                    mContentTopMargin = yPos + radius + mShapePadding;
+                    mContentBottomMargin = 0;
+                    mGravity = Gravity.TOP;
+                }
             }
         }
 
@@ -666,6 +674,11 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             return this;
         }
 
+        public Builder shouldContentStartFromTargetCenter(boolean value) {
+            showcaseView.shouldContentStartFromTargetCenter(value);
+            return this;
+        }
+
         public MaterialShowcaseView build() {
             if (showcaseView.mShape == null) {
                 switch (shapeType) {
@@ -694,6 +707,10 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             return showcaseView;
         }
 
+    }
+
+    private void shouldContentStartFromTargetCenter(boolean value) {
+        this.mContentStartFromTargetCenter = value;
     }
 
     private void singleUse(String showcaseID) {
