@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private TextView mTitleTextView;
     private TextView mContentTextView;
     private TextView mDismissButton;
+    private ImageView mHandImage;
     private int mGravity;
     private int mContentBottomMargin;
     private int mContentTopMargin;
@@ -124,6 +126,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         mTitleTextView = (TextView) contentView.findViewById(R.id.tv_title);
         mContentTextView = (TextView) contentView.findViewById(R.id.tv_content);
         mDismissButton = (TextView) contentView.findViewById(R.id.tv_dismiss);
+        mHandImage = (ImageView) contentView.findViewById(R.id.iv_hand);
         mDismissButton.setOnClickListener(this);
     }
 
