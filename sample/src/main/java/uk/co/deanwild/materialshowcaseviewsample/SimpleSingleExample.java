@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 import uk.co.deanwild.materialshowcaseview.shape.CircleShape;
-import uk.co.deanwild.materialshowcaseview.shape.RectangleShape;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -70,6 +69,7 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
                 .shouldContentStartFromTargetCenter(true)
                 .setHighlightShape(new CircleShape())
                 .setHightlightTarget(mButtonShow)
+                .setParentViewActive(true)
                 .show();
     }
 

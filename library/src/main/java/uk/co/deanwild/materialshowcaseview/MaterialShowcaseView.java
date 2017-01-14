@@ -83,6 +83,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private IDetachedListener mDetachedListener;
     private boolean mTargetTouchable = false;
     private boolean mDismissOnTargetTouch = true;
+    private boolean isParentViewActive = false;
 
     public MaterialShowcaseView(Context context) {
         super(context);
@@ -175,19 +176,21 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         // clear canvas
         mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
-        // draw solid background
-        mCanvas.drawColor(mMaskColour);
+        if (!isParentViewActive) {
+            // draw solid background
+            mCanvas.drawColor(mMaskColour);
 
-        // Prepare eraser Paint if needed
-        if (mEraser == null) {
-            mEraser = new Paint();
-            mEraser.setColor(0xFFFFFFFF);
-            mEraser.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-            mEraser.setFlags(Paint.ANTI_ALIAS_FLAG);
+            // Prepare eraser Paint if needed
+            if (mEraser == null) {
+                mEraser = new Paint();
+                mEraser.setColor(0xFFFFFFFF);
+                mEraser.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+                mEraser.setFlags(Paint.ANTI_ALIAS_FLAG);
+            }
+
+            // draw (erase) shape
+            mShape.draw(mCanvas, mEraser, mXPosition, mYPosition, mShapePadding);
         }
-
-        // draw (erase) shape
-        mShape.draw(mCanvas, mEraser, mXPosition, mYPosition, mShapePadding);
 
         // hightlight view if asked for it
         if (mHighlightTarget != null && mHighlightShape != null) {
@@ -236,6 +239,10 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         if (mDismissOnTouch) {
             hide();
         }
+        if (isParentViewActive) {
+            return false;
+        }
+
         if(mTargetTouchable && mTarget.getBounds().contains((int)event.getX(), (int)event.getY())){
             if(mDismissOnTargetTouch){
                 hide();
@@ -749,6 +756,11 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             return this;
         }
 
+        public Builder setParentViewActive(boolean value) {
+            showcaseView.setParentViewActive(value);
+            return this;
+        }
+
         public MaterialShowcaseView build() {
             if (showcaseView.mTarget != null && showcaseView.mShape == null) {
                 switch (shapeType) {
@@ -784,6 +796,10 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         if (mHighlightTarget != null && mHighlightShape != null) {
             mHighlightShape.updateTarget(viewTarget);
         }
+    }
+
+    private void setParentViewActive(boolean value) {
+        isParentViewActive = value;
     }
 
     private void shouldContentStartFromTargetCenter(boolean value) {
