@@ -149,6 +149,8 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         // don't bother drawing if we're not ready
         if (!mShouldRender) return;
 
+        if (mTarget == null) return;
+
         // get current dimensions
         final int width = getMeasuredWidth();
         final int height = getMeasuredHeight();
@@ -748,7 +750,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         }
 
         public MaterialShowcaseView build() {
-            if (showcaseView.mShape == null) {
+            if (showcaseView.mTarget != null && showcaseView.mShape == null) {
                 switch (shapeType) {
                     case RECTANGLE_SHAPE: {
                         showcaseView.setShape(new RectangleShape(showcaseView.mTarget.getBounds(), fullWidth));
