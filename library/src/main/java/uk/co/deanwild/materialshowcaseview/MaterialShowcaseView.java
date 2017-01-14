@@ -207,6 +207,13 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
 
     }
 
+    public void setContentTextView(TextView view) {
+        int pos = ((ViewGroup) mContentBox).indexOfChild(mContentTextView);
+        ((ViewGroup) mContentBox).removeView(mContentTextView);
+        ((ViewGroup) mContentBox).addView(view, pos);
+        mContentTextView = view;
+    }
+
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (mDismissOnTouch) {
@@ -697,6 +704,11 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
 
         public Builder showActionIcon(boolean value) {
             showcaseView.showActionIcon(value);
+            return this;
+        }
+
+        public Builder setContentTextView(TextView view) {
+            showcaseView.setContentTextView(view);
             return this;
         }
 

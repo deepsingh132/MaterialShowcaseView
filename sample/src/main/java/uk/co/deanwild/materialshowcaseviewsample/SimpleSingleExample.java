@@ -1,12 +1,19 @@
 package uk.co.deanwild.materialshowcaseviewsample;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
+
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 
 public class SimpleSingleExample extends AppCompatActivity implements View.OnClickListener {
@@ -46,15 +53,29 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
     }
 
     private void presentShowcaseView(int withDelay) {
+        TextView textView = getCustomContentTextView();
         new MaterialShowcaseView.Builder(this)
                 .setTarget(mButtonShow)
                 .setTargetTouchable(true)
-                .setContentText("This is some amazing feature you should know about")
+                .setContentTextView(textView)
                 .showActionIcon(true)
                 .setDelay(withDelay) // optional but starting animations immediately in onCreate can make them choppy
-                .singleUse(SHOWCASE_ID) // provide a unique ID used to ensure it is only shown once
                 .shouldContentStartFromTargetCenter(true)
                 .show();
+    }
+
+    @NonNull
+    private TextView getCustomContentTextView() {
+        TextView textView = new TextView(this);
+        textView.setText("This is a custom text view");
+        textView.setTextColor(ContextCompat.getColor(this, R.color.green));
+        textView.setBackgroundColor(ContextCompat.getColor(this, R.color.darkred));
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        layoutParams.gravity = Gravity.CENTER;
+        layoutParams.setMargins(10, 10, 10, 10);
+        textView.setLayoutParams(layoutParams);
+        textView.setPadding(30, 10, 30, 10);
+        return textView;
     }
 
 
