@@ -47,7 +47,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private Bitmap mBitmap;// = new WeakReference<>(null);
     private Canvas mCanvas;
     private Paint mEraser;
-    private Target mTarget;
+    private Target mActiveTarget;
     private Target mHighlightTarget;
     private Shape mShape;
     private Shape mHighlightShape;
@@ -150,7 +150,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         // don't bother drawing if we're not ready
         if (!mShouldRender) return;
 
-        if (mTarget == null) return;
+        if (mActiveTarget == null) return;
 
         // get current dimensions
         final int width = getMeasuredWidth();
@@ -243,7 +243,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             return false;
         }
 
-        if(mTargetTouchable && mTarget.getBounds().contains((int)event.getX(), (int)event.getY())){
+        if(mTargetTouchable && mActiveTarget.getBounds().contains((int)event.getX(), (int)event.getY())){
             if(mDismissOnTargetTouch){
                 hide();
             }
@@ -297,13 +297,13 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
      *
      * @param target
      */
-    public void setTarget(Target target) {
-        mTarget = target;
+    public void setActiveTarget(Target target) {
+        mActiveTarget = target;
 
         // update dismiss button state
         updateDismissButton();
 
-        if (mTarget != null) {
+        if (mActiveTarget != null) {
 
             /**
              * If we're on lollipop then make sure we don't draw over the nav bar
@@ -317,8 +317,8 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             }
 
             // apply the target position
-            Point targetPoint = mTarget.getPoint();
-            Rect targetBounds = mTarget.getBounds();
+            Point targetPoint = mActiveTarget.getPoint();
+            Rect targetBounds = mActiveTarget.getBounds();
             setPosition(targetPoint);
 
             // now figure out whether to put content above or below it, OR at the center
@@ -329,7 +329,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
 
             int radius = Math.max(targetBounds.height(), targetBounds.width()) / 2;
             if (mShape != null) {
-                mShape.updateTarget(mTarget);
+                mShape.updateTarget(mActiveTarget);
                 radius = mShape.getHeight() / 2;
             }
 
@@ -547,7 +547,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
 
         @Override
         public void onGlobalLayout() {
-            setTarget(mTarget);
+            setActiveTarget(mActiveTarget);
             setHighlightTarget(mHighlightTarget);
         }
     }
@@ -578,8 +578,8 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         /**
          * Set the title text shown on the ShowcaseView.
          */
-        public Builder setTarget(View target) {
-            showcaseView.setTarget(new ViewTarget(target));
+        public Builder setActiveTarget(View activeTarget) {
+            showcaseView.setActiveTarget(new ViewTarget(activeTarget));
             return this;
         }
 
@@ -762,14 +762,14 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         }
 
         public MaterialShowcaseView build() {
-            if (showcaseView.mTarget != null && showcaseView.mShape == null) {
+            if (showcaseView.mActiveTarget != null && showcaseView.mShape == null) {
                 switch (shapeType) {
                     case RECTANGLE_SHAPE: {
-                        showcaseView.setShape(new RectangleShape(showcaseView.mTarget.getBounds(), fullWidth));
+                        showcaseView.setShape(new RectangleShape(showcaseView.mActiveTarget.getBounds(), fullWidth));
                         break;
                     }
                     case CIRCLE_SHAPE: {
-                        showcaseView.setShape(new CircleShape(showcaseView.mTarget));
+                        showcaseView.setShape(new CircleShape(showcaseView.mActiveTarget));
                         break;
                     }
                     case NO_SHAPE: {

@@ -44,7 +44,7 @@ public class CustomExample extends AppCompatActivity implements View.OnClickList
         if (item.getItemId() == R.id.menu_sample_action) {
             View view = findViewById(R.id.menu_sample_action);
             new MaterialShowcaseView.Builder(this)
-                    .setTarget(view)
+                    .setActiveTarget(view)
                     .setShapePadding(96)
                     .setDismissText("GOT IT")
                     .setContentText("Example of how to setup a MaterialShowcaseView for menu items in action bar.")
@@ -73,7 +73,7 @@ public class CustomExample extends AppCompatActivity implements View.OnClickList
 
     private void presentShowcaseView(int withDelay) {
         new MaterialShowcaseView.Builder(this)
-                .setTarget(mButtonShow)
+                .setActiveTarget(mButtonShow)
                 .setContentText("This is some amazing feature you should know about")
                 .setDismissOnTouch(true)
                 .setContentTextColor(getResources().getColor(R.color.green))

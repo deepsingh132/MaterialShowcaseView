@@ -59,7 +59,7 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
         TextView textView = getCustomContentTextView();
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         new MaterialShowcaseView.Builder(this)
-                .setTarget(mButtonShow)
+                .setActiveTarget(mButtonShow)
                 .withRectangleShape()
                 .setTargetTouchable(true)
                 .setContentTextView(textView)

@@ -37,7 +37,7 @@ public class MaterialShowcaseSequence implements IDetachedListener {
     public MaterialShowcaseSequence addSequenceItem(View targetView, String title, String content, String dismissText) {
 
         MaterialShowcaseView sequenceItem = new MaterialShowcaseView.Builder(mActivity)
-                .setTarget(targetView)
+                .setActiveTarget(targetView)
                 .setTitleText(title)
                 .setDismissText(dismissText)
                 .setContentText(content)
