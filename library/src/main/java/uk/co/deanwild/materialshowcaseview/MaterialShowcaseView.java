@@ -300,7 +300,10 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
      */
     public void setActiveTarget(Target target) {
         mActiveTarget = target;
+        updateContentViewLayout();
+    }
 
+    private void updateContentViewLayout() {
         if (mActiveTarget != null) {
 
             /**
@@ -308,7 +311,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
              */
             if (!mRenderOverNav && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 mBottomMargin = getSoftButtonsBarSizePort((Activity) getContext());
-                FrameLayout.LayoutParams contentLP = (LayoutParams) getLayoutParams();
+                LayoutParams contentLP = (LayoutParams) getLayoutParams();
 
                 if (contentLP != null && contentLP.bottomMargin != mBottomMargin)
                     contentLP.bottomMargin = mBottomMargin;
@@ -562,8 +565,8 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
 
         @Override
         public void onGlobalLayout() {
-            setActiveTarget(mActiveTarget);
-            setHighlightTarget(mHighlightTarget);
+            updateContentViewLayout();
+            updateHighlightTargetLayout();
         }
     }
 
@@ -808,8 +811,12 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
 
     private void setHighlightTarget(Target viewTarget) {
         mHighlightTarget = viewTarget;
+        updateHighlightTargetLayout();
+    }
+
+    private void updateHighlightTargetLayout() {
         if (mHighlightTarget != null && mHighlightShape != null) {
-            mHighlightShape.updateTarget(viewTarget);
+            mHighlightShape.updateTarget(mHighlightTarget);
         }
     }
 
