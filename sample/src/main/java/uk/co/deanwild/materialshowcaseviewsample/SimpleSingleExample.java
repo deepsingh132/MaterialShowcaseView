@@ -69,7 +69,6 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
                 .shouldContentStartFromTargetCenter(true)
                 .setHighlightShape(new CircleShape())
                 .setHightlightTarget(mButtonShow)
-                .setParentViewActive(true)
                 .show();
     }
 

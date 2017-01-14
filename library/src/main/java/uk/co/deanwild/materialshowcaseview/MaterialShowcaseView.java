@@ -301,9 +301,6 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     public void setActiveTarget(Target target) {
         mActiveTarget = target;
 
-        // update dismiss button state
-        updateDismissButton();
-
         if (mActiveTarget != null) {
 
             /**
