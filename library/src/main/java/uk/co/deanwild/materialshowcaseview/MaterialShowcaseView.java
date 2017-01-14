@@ -49,7 +49,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private Paint mEraser;
     private Target mActiveTarget;
     private Target mHighlightTarget;
-    private Shape mShape;
+    private Shape mActiveTargetShape;
     private Shape mHighlightShape;
     private int mXPosition;
     private int mYPosition;
@@ -84,6 +84,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private boolean mTargetTouchable = false;
     private boolean mDismissOnTargetTouch = true;
     private boolean isParentViewActive = false;
+    private boolean showingSpotlightView = false;
 
     public MaterialShowcaseView(Context context) {
         super(context);
@@ -189,7 +190,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             }
 
             // draw (erase) shape
-            mShape.draw(mCanvas, mEraser, mXPosition, mYPosition, mShapePadding);
+            mActiveTargetShape.draw(mCanvas, mEraser, mXPosition, mYPosition, mShapePadding);
         }
 
         // hightlight view if asked for it
@@ -328,9 +329,9 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             int xPos = targetPoint.x;
 
             int radius = Math.max(targetBounds.height(), targetBounds.width()) / 2;
-            if (mShape != null) {
-                mShape.updateTarget(mActiveTarget);
-                radius = mShape.getHeight() / 2;
+            if (mActiveTargetShape != null) {
+                mActiveTargetShape.updateTarget(mActiveTarget);
+                radius = mActiveTargetShape.getHeight() / 2;
             }
 
             if (mContentStartFromTargetCenter) {
@@ -394,6 +395,23 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         }
     }
 
+    public void setSpotlightView(View view) {
+        showingSpotlightView = true;
+        ((ViewGroup) mContentBox).removeAllViews();
+        ((ViewGroup) mContentBox).addView(view);
+        setAppropriateGravityForContentBox(Gravity.CENTER);
+    }
+
+    private void setAppropriateGravityForContentBox(int center) {
+        if (mContentBox != null && mContentBox.getLayoutParams() != null) {
+            FrameLayout.LayoutParams contentLayoutParams = (LayoutParams) mContentBox.getLayoutParams();
+            if (contentLayoutParams.gravity != center) {
+                contentLayoutParams.gravity = center;
+                mContentBox.setLayoutParams(contentLayoutParams);
+            }
+        }
+    }
+
     /**
      * SETTERS
      */
@@ -452,7 +470,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         }
     }
 
-    private void setShapePadding(int padding) {
+    private void setActiveTargetShapePadding(int padding) {
         mShapePadding = padding;
     }
 
@@ -501,8 +519,8 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         mDetachedListener = detachedListener;
     }
 
-    public void setShape(Shape mShape) {
-        this.mShape = mShape;
+    public void setActiveTargetShape(Shape mShape) {
+        this.mActiveTargetShape = mShape;
     }
 
     /**
@@ -516,8 +534,8 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         setContentTextColor(config.getContentTextColor());
         setDismissTextColor(config.getDismissTextColor());
         setMaskColour(config.getMaskColor());
-        setShape(config.getShape());
-        setShapePadding(config.getShapePadding());
+        setActiveTargetShape(config.getShape());
+        setActiveTargetShapePadding(config.getShapePadding());
         setRenderOverNavigationBar(config.getRenderOverNavigationBar());
     }
 
@@ -690,8 +708,8 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             return this;
         }
 
-        public Builder setShape(Shape shape) {
-            showcaseView.setShape(shape);
+        public Builder setActiveTargetShape(Shape shape) {
+            showcaseView.setActiveTargetShape(shape);
             return this;
         }
 
@@ -710,8 +728,8 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             return this;
         }
 
-        public Builder setShapePadding(int padding) {
-            showcaseView.setShapePadding(padding);
+        public Builder setActiveTargetShapePadding(int padding) {
+            showcaseView.setActiveTargetShapePadding(padding);
             return this;
         }
 
@@ -762,18 +780,18 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         }
 
         public MaterialShowcaseView build() {
-            if (showcaseView.mActiveTarget != null && showcaseView.mShape == null) {
+            if (showcaseView.mActiveTarget != null && showcaseView.mActiveTargetShape == null) {
                 switch (shapeType) {
                     case RECTANGLE_SHAPE: {
-                        showcaseView.setShape(new RectangleShape(showcaseView.mActiveTarget.getBounds(), fullWidth));
+                        showcaseView.setActiveTargetShape(new RectangleShape(showcaseView.mActiveTarget.getBounds(), fullWidth));
                         break;
                     }
                     case CIRCLE_SHAPE: {
-                        showcaseView.setShape(new CircleShape(showcaseView.mActiveTarget));
+                        showcaseView.setActiveTargetShape(new CircleShape(showcaseView.mActiveTarget));
                         break;
                     }
                     case NO_SHAPE: {
-                        showcaseView.setShape(new NoShape());
+                        showcaseView.setActiveTargetShape(new NoShape());
                         break;
                     }
                     default:
