@@ -214,6 +214,10 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         mContentTextView = view;
     }
 
+    public void setActionIcon(Bitmap bitmap) {
+        mActionIcon.setImageBitmap(bitmap);
+    }
+
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (mDismissOnTouch) {
@@ -709,6 +713,11 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
 
         public Builder setContentTextView(TextView view) {
             showcaseView.setContentTextView(view);
+            return this;
+        }
+
+        public Builder setActionIcon(Bitmap bitmap) {
+            showcaseView.setActionIcon(bitmap);
             return this;
         }
 

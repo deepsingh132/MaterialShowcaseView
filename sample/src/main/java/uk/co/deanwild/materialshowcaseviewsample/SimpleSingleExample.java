@@ -1,5 +1,7 @@
 package uk.co.deanwild.materialshowcaseviewsample;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -54,11 +56,13 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
 
     private void presentShowcaseView(int withDelay) {
         TextView textView = getCustomContentTextView();
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         new MaterialShowcaseView.Builder(this)
                 .setTarget(mButtonShow)
                 .setTargetTouchable(true)
                 .setContentTextView(textView)
                 .showActionIcon(true)
+                .setActionIcon(bitmap)
                 .setDelay(withDelay) // optional but starting animations immediately in onCreate can make them choppy
                 .shouldContentStartFromTargetCenter(true)
                 .show();
