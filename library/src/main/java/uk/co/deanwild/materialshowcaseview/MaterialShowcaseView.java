@@ -51,6 +51,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private Target mHighlightTarget;
     private Shape mActiveTargetShape;
     private Shape mHighlightShape;
+    private Target mSpotlightTargetView;
     private int mXPosition;
     private int mYPosition;
     private boolean mWasDismissed = false;
@@ -81,9 +82,9 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     List<IShowcaseListener> mListeners; // external listeners who want to observe when we show and dismiss
     private UpdateOnGlobalLayout mLayoutListener;
     private IDetachedListener mDetachedListener;
-    private boolean mTargetTouchable = false;
+    private boolean mActiveTargetTouchable = false;
     private boolean mDismissOnTargetTouch = true;
-    private boolean isParentViewActive = false;
+    private boolean isBackgroundViewActive = false;
     private boolean showingSpotlightView = false;
 
     public MaterialShowcaseView(Context context) {
@@ -151,22 +152,19 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         // don't bother drawing if we're not ready
         if (!mShouldRender) return;
 
-        if (mActiveTarget == null) return;
-
         // get current dimensions
         final int width = getMeasuredWidth();
         final int height = getMeasuredHeight();
 
-		// don't bother drawing if there is nothing to draw on
-		if(width <= 0 || height <= 0) return;
+        // don't bother drawing if there is nothing to draw on
+        if (width <= 0 || height <= 0) return;
 
         // build a new canvas if needed i.e first pass or new dimensions
         if (mBitmap == null || mCanvas == null || mOldHeight != height || mOldWidth != width) {
-
-            if (mBitmap != null) mBitmap.recycle();
-
+            if (mBitmap != null) {
+                mBitmap.recycle();
+            }
             mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-
             mCanvas = new Canvas(mBitmap);
         }
 
@@ -177,33 +175,45 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         // clear canvas
         mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
-        if (!isParentViewActive) {
-            // draw solid background
+        if (!isBackgroundViewActive) {
+            // draw overlay background
             mCanvas.drawColor(mMaskColour);
-
-            // Prepare eraser Paint if needed
-            if (mEraser == null) {
-                mEraser = new Paint();
-                mEraser.setColor(0xFFFFFFFF);
-                mEraser.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-                mEraser.setFlags(Paint.ANTI_ALIAS_FLAG);
-            }
-
-            // draw (erase) shape
-            mActiveTargetShape.draw(mCanvas, mEraser, mXPosition, mYPosition, mShapePadding);
         }
 
-        // hightlight view if asked for it
+        // Prepare active element if needed
+        checkAndMakeActiveTarget();
+
+        checkAndDrawHighlight();
+
+
+        // Draw the bitmap on our views canvas.
+        canvas.drawBitmap(mBitmap, 0, 0, null);
+
+    }
+
+    private void checkAndDrawHighlight() {
+        // highlight view if asked for it
         if (mHighlightTarget != null && mHighlightShape != null) {
             Paint highLightPaint = new Paint();
             highLightPaint.setStyle(Paint.Style.STROKE);
             highLightPaint.setColor(0xFFFF0000);
             mHighlightShape.draw(mCanvas, highLightPaint, mHighlightTarget.getPoint().x, mHighlightTarget.getPoint().y, 0);
         }
+    }
 
-        // Draw the bitmap on our views canvas.
-        canvas.drawBitmap(mBitmap, 0, 0, null);
+    private void checkAndMakeActiveTarget() {
+        if (mActiveTarget == null || mActiveTargetShape == null) {
+            return;
+        }
+        if (mEraser == null) {
+            mEraser = new Paint();
+            mEraser.setColor(0xFFFFFFFF);
+            mEraser.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+            mEraser.setFlags(Paint.ANTI_ALIAS_FLAG);
+        }
 
+        // draw (erase) shape
+        mActiveTargetShape.draw(mCanvas, mEraser, mXPosition, mYPosition, mShapePadding);
     }
 
     @Override
@@ -240,11 +250,14 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         if (mDismissOnTouch) {
             hide();
         }
-        if (isParentViewActive) {
+        if (mSpotlightTargetView != null && mSpotlightTargetView.getBounds().contains((int) event.getX(), (int) event.getY())) {
+            return true;
+        }
+        if (isBackgroundViewActive) {
             return false;
         }
 
-        if(mTargetTouchable && mActiveTarget.getBounds().contains((int)event.getX(), (int)event.getY())){
+        if (mActiveTargetTouchable && mActiveTarget != null && mActiveTarget.getBounds().contains((int) event.getX(), (int) event.getY())) {
             if(mDismissOnTargetTouch){
                 hide();
             }
@@ -395,21 +408,22 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         }
     }
 
+    /***
+     * for now, if you are showing spotlight, you can't show any other view
+     *
+     * @param view
+     */
     public void setSpotlightView(View view) {
+        mSpotlightTargetView = new ViewTarget(view);
         showingSpotlightView = true;
+        mActiveTarget = null;
         ((ViewGroup) mContentBox).removeAllViews();
         ((ViewGroup) mContentBox).addView(view);
-        setAppropriateGravityForContentBox(Gravity.CENTER);
-    }
-
-    private void setAppropriateGravityForContentBox(int center) {
-        if (mContentBox != null && mContentBox.getLayoutParams() != null) {
-            FrameLayout.LayoutParams contentLayoutParams = (LayoutParams) mContentBox.getLayoutParams();
-            if (contentLayoutParams.gravity != center) {
-                contentLayoutParams.gravity = center;
-                mContentBox.setLayoutParams(contentLayoutParams);
-            }
-        }
+        mContentTopMargin = getMeasuredHeight() / 2;
+        mContentLeftMargin = getMeasuredWidth() / 2;
+        mContentBottomMargin = 0;
+        mGravity = Gravity.CENTER;
+        applyLayoutParams();
     }
 
     /**
@@ -495,7 +509,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     }
 
     private void setTargetTouchable(boolean targetTouchable){
-        mTargetTouchable = targetTouchable;
+        mActiveTargetTouchable = targetTouchable;
     }
 
     private void setDismissOnTargetTouch(boolean dismissOnTargetTouch){
@@ -754,7 +768,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             return this;
         }
 
-        public Builder shouldContentStartFromTargetCenter(boolean value) {
+        public Builder startContentFromActiveTargetCenter(boolean value) {
             showcaseView.shouldContentStartFromTargetCenter(value);
             return this;
         }
@@ -774,8 +788,13 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             return this;
         }
 
-        public Builder setParentViewActive(boolean value) {
-            showcaseView.setParentViewActive(value);
+        public Builder setBackgroundViewActive(boolean value) {
+            showcaseView.setBackgroundViewActive(value);
+            return this;
+        }
+
+        public Builder setSpotlightView(View view) {
+            showcaseView.setSpotlightView(view);
             return this;
         }
 
@@ -820,8 +839,8 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         }
     }
 
-    private void setParentViewActive(boolean value) {
-        isParentViewActive = value;
+    private void setBackgroundViewActive(boolean value) {
+        isBackgroundViewActive = value;
     }
 
     private void shouldContentStartFromTargetCenter(boolean value) {

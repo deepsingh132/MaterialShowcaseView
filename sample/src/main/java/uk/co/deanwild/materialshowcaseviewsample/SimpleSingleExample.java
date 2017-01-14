@@ -1,21 +1,20 @@
 package uk.co.deanwild.materialshowcaseviewsample;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
-import uk.co.deanwild.materialshowcaseview.shape.CircleShape;
-import uk.co.deanwild.materialshowcaseview.shape.RectangleShape;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -57,19 +56,10 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
     }
 
     private void presentShowcaseView(int withDelay) {
-        TextView textView = getCustomContentTextView();
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         new MaterialShowcaseView.Builder(this)
-                .setActiveTarget(mButtonShow)
-                .withRectangleShape()
-                .setTargetTouchable(true)
-                .setContentTextView(textView)
-                .showActionIcon(true)
-                .setActionIcon(bitmap)
+                .setSpotlightView(getCustomViewGroup())
+                .setBackgroundViewActive(true)
                 .setDelay(withDelay) // optional but starting animations immediately in onCreate can make them choppy
-                .shouldContentStartFromTargetCenter(true)
-                .setHighlightShape(new RectangleShape(20,20))
-                .setHightlightTarget(mButtonShow)
                 .show();
     }
 
@@ -81,11 +71,40 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
         textView.setBackgroundColor(ContextCompat.getColor(this, R.color.darkred));
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
         layoutParams.gravity = Gravity.CENTER;
-        layoutParams.setMargins(10, 10, 10, 10);
+        layoutParams.setMargins(30, 30, 30, 30);
         textView.setLayoutParams(layoutParams);
         textView.setPadding(30, 10, 30, 10);
         return textView;
     }
 
+    @NonNull
+    private ImageView getCustomImageView() {
+        ImageView imageView = new ImageView(this);
+        imageView.setImageResource(R.mipmap.ic_launcher);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        layoutParams.gravity = Gravity.CENTER;
+        layoutParams.setMargins(30, 30, 30, 30);
+        imageView.setLayoutParams(layoutParams);
+        imageView.setPadding(30, 10, 30, 10);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("imageview", "click");
+            }
+        });
+        return imageView;
+    }
+
+    @NonNull
+    private ViewGroup getCustomViewGroup() {
+        LinearLayout linearLayout = new LinearLayout(this);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        linearLayout.setLayoutParams(layoutParams);
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+        linearLayout.setBackgroundColor(0xFFCCCCCC);
+        linearLayout.addView(getCustomContentTextView());
+        linearLayout.addView(getCustomImageView());
+        return linearLayout;
+    }
 
 }
