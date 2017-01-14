@@ -14,6 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
+import uk.co.deanwild.materialshowcaseview.shape.CircleShape;
+import uk.co.deanwild.materialshowcaseview.shape.RectangleShape;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -59,12 +61,15 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         new MaterialShowcaseView.Builder(this)
                 .setTarget(mButtonShow)
+                .withRectangleShape()
                 .setTargetTouchable(true)
                 .setContentTextView(textView)
                 .showActionIcon(true)
                 .setActionIcon(bitmap)
                 .setDelay(withDelay) // optional but starting animations immediately in onCreate can make them choppy
                 .shouldContentStartFromTargetCenter(true)
+                .setHighlightShape(new CircleShape())
+                .setHightlightTarget(mButtonShow)
                 .show();
     }
 

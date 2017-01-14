@@ -48,7 +48,9 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private Canvas mCanvas;
     private Paint mEraser;
     private Target mTarget;
+    private Target mHighlightTarget;
     private Shape mShape;
+    private Shape mHighlightShape;
     private int mXPosition;
     private int mYPosition;
     private boolean mWasDismissed = false;
@@ -185,8 +187,17 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         // draw (erase) shape
         mShape.draw(mCanvas, mEraser, mXPosition, mYPosition, mShapePadding);
 
-        // Draw the bitmap on our views  canvas.
+        // hightlight view if asked for it
+        if (mHighlightTarget != null && mHighlightShape != null) {
+            Paint highLightPaint = new Paint();
+            highLightPaint.setStyle(Paint.Style.STROKE);
+            highLightPaint.setColor(0xFFFF0000);
+            mHighlightShape.draw(mCanvas, highLightPaint, mHighlightTarget.getPoint().x, mHighlightTarget.getPoint().y, 0);
+        }
+
+        // Draw the bitmap on our views canvas.
         canvas.drawBitmap(mBitmap, 0, 0, null);
+
     }
 
     @Override
@@ -516,6 +527,10 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         return mPrefsManager.hasFired();
     }
 
+    public void setHighlightShape(Shape highlightShape) {
+        this.mHighlightShape = highlightShape;
+    }
+
     /**
      * REDRAW LISTENER - this ensures we redraw after activity finishes laying out
      */
@@ -524,6 +539,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         @Override
         public void onGlobalLayout() {
             setTarget(mTarget);
+            setHighlightTarget(mHighlightTarget);
         }
     }
 
@@ -670,6 +686,11 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             return this;
         }
 
+        public Builder setHighlightShape(Shape shape) {
+            showcaseView.setHighlightShape(shape);
+            return this;
+        }
+
         public Builder withCircleShape() {
             shapeType = CIRCLE_SHAPE;
             return this;
@@ -692,6 +713,11 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         public Builder withRectangleShape(boolean fullWidth) {
             this.shapeType = RECTANGLE_SHAPE;
             this.fullWidth = fullWidth;
+            return this;
+        }
+
+        public Builder setHightlightTarget(View view) {
+            showcaseView.setHighlightTarget(new ViewTarget(view));
             return this;
         }
 
@@ -749,6 +775,13 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             return showcaseView;
         }
 
+    }
+
+    private void setHighlightTarget(Target viewTarget) {
+        mHighlightTarget = viewTarget;
+        if (mHighlightTarget != null && mHighlightShape != null) {
+            mHighlightShape.updateTarget(viewTarget);
+        }
     }
 
     private void shouldContentStartFromTargetCenter(boolean value) {
