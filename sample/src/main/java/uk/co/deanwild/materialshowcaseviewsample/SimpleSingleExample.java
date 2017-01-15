@@ -2,6 +2,7 @@ package uk.co.deanwild.materialshowcaseviewsample;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -9,12 +10,19 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
+import uk.co.deanwild.materialshowcaseview.TourFragment;
+import uk.co.deanwild.materialshowcaseview.TourViewPager;
+import uk.co.deanwild.materialshowcaseview.TourViewPagerAdapter;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -25,6 +33,7 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
     private Button mButtonReset;
 
     private static final String SHOWCASE_ID = "simple example";
+    private LinearLayout.LayoutParams layoutParamsForTour;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +65,15 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
     }
 
     private void presentShowcaseView(int withDelay) {
+        TourViewPager tourViewPager = new TourViewPager(this);
+        tourViewPager.setId(R.id.viewPagerId);
+        tourViewPager.setLayoutParams(getLayoutParamsForTour());
+        TourViewPagerAdapter tourViewPagerAdapter = new TourViewPagerAdapter(getSupportFragmentManager());
+        tourViewPagerAdapter.setTourScreens(getCustomTourScreens());
+        tourViewPager.setAdapter(tourViewPagerAdapter);
         new MaterialShowcaseView.Builder(this)
-                .setSpotlightView(getCustomViewGroup())
-                .setBackgroundViewActive(true)
+                //.setSpotlightView(tourViewPager)
+                .setTourView(getCustomTourScreens(), this, getSupportFragmentManager(), getLayoutParamsForTour())
                 .setDelay(withDelay) // optional but starting animations immediately in onCreate can make them choppy
                 .show();
     }
@@ -107,4 +122,19 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
         return linearLayout;
     }
 
+    private List<Fragment> getCustomTourScreens() {
+        List<Fragment> screens = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            TourFragment tourFragment = new TourFragment();
+            tourFragment.setView(getCustomViewGroup());
+            screens.add(tourFragment);
+        }
+        return screens;
+    }
+
+    public FrameLayout.LayoutParams getLayoutParamsForTour() {
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, Gravity.CENTER);
+        layoutParams.setMargins(150, 50, 150, 50);
+        return layoutParams;
+    }
 }

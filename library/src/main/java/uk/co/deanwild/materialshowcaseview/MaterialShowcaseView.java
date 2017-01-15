@@ -13,6 +13,9 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -24,6 +27,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -36,9 +40,11 @@ import uk.co.deanwild.materialshowcaseview.shape.Shape;
 import uk.co.deanwild.materialshowcaseview.target.Target;
 import uk.co.deanwild.materialshowcaseview.target.ViewTarget;
 
+import static android.view.Gravity.BOTTOM;
+
 
 /**
- * Helper class to show a sequence of showcase views.
+ * Helper class to show a sequence of showcase screens.
  */
 public class MaterialShowcaseView extends FrameLayout implements View.OnTouchListener, View.OnClickListener {
 
@@ -66,6 +72,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private int mContentBottomMargin;
     private int mContentTopMargin;
     private int mContentLeftMargin;
+    private int mHeight;
     private boolean mDismissOnTouch = false;
     private boolean mShouldRender = false; // flag to decide when we should actually render
     private boolean mRenderOverNav = false;
@@ -85,7 +92,13 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private boolean mActiveTargetTouchable = false;
     private boolean mDismissOnTargetTouch = true;
     private boolean isBackgroundViewActive = false;
-    private boolean showingSpotlightView = false;
+    private boolean showingTourView = false;
+    private boolean shouldUpdateContentViewOnGlobalLayoutComplete = true;
+
+    private TourViewPager tourViewPager;
+    private TourViewPagerAdapter tourViewPagerAdapter;
+    private LinearLayout indicatorLayout;
+    private ImageView[] indicators;
 
     public MaterialShowcaseView(Context context) {
         super(context);
@@ -186,7 +199,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         checkAndDrawHighlight();
 
 
-        // Draw the bitmap on our views canvas.
+        // Draw the bitmap on our screens canvas.
         canvas.drawBitmap(mBitmap, 0, 0, null);
 
     }
@@ -359,7 +372,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
                     mContentTopMargin = 0;
                     mContentBottomMargin = (height - yPos) + radius + mShapePadding;
                     mContentLeftMargin = 0;
-                    mGravity = Gravity.BOTTOM;
+                    mGravity = BOTTOM;
                 } else {
                     // target is in upper half of screen, we'll sit below it
                     mContentTopMargin = yPos + radius + mShapePadding;
@@ -415,7 +428,6 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
      */
     public void setSpotlightView(View view) {
         mSpotlightTargetView = new ViewTarget(view);
-        showingSpotlightView = true;
         mActiveTarget = null;
         ((ViewGroup) mContentBox).removeAllViews();
         ((ViewGroup) mContentBox).addView(view);
@@ -424,6 +436,89 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         mContentBottomMargin = 0;
         mGravity = Gravity.CENTER;
         applyLayoutParams();
+    }
+
+    public void setTourScreens(List<Fragment> screens, Context context, FragmentManager fragmentManager,
+                               FrameLayout.LayoutParams layoutParams) {
+        showingTourView = true;
+        tourViewPager = new TourViewPager(context);
+        tourViewPager.setId(R.id.viewPagerId);
+        tourViewPager.setLayoutParams(layoutParams);
+        tourViewPagerAdapter = new TourViewPagerAdapter(fragmentManager);
+        tourViewPagerAdapter.setTourScreens(screens);
+        tourViewPager.setAdapter(tourViewPagerAdapter);
+
+        ((ViewGroup) mContentBox).removeAllViews();
+        ((ViewGroup) mContentBox).addView(tourViewPager);
+
+        indicatorLayout = getDefaultIndicatorLayoutForTour(context);
+        indicators = new ImageView[tourViewPagerAdapter.getCount()];
+        for (int i = 0; i < tourViewPagerAdapter.getCount(); i++) {
+            indicators[i] = new ImageView(context);
+            indicators[i].setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT));
+            indicators[i].setPadding(10, 0, 10, 0);
+            indicators[i].setImageResource(R.drawable.selected_dot_indicator);
+            indicatorLayout.addView(indicators[i]);
+        }
+
+        ((ViewGroup) mContentBox).addView(indicatorLayout);
+        changeTourIndicators(0);
+
+        tourViewPager.addOnPageChangeListener(getTourPageChangeListener());
+
+        mGravity = BOTTOM;
+        mContentBottomMargin = 100;
+        mContentTopMargin = 50;
+        mContentBox.setPadding(50, 200, 50, 200);
+        mContentBox.setBackgroundColor(0xFF000000);
+        applyLayoutParams();
+    }
+
+    private ViewPager.OnPageChangeListener getTourPageChangeListener() {
+        return new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                changeTourIndicators(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        };
+    }
+
+    private LinearLayout getDefaultIndicatorLayoutForTour(Context context) {
+        LinearLayout linearLayout = new LinearLayout(context);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.bottomMargin = 25;
+        layoutParams.topMargin = 20;
+        layoutParams.gravity = Gravity.CENTER;
+        linearLayout.setLayoutParams(layoutParams);
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+        return linearLayout;
+    }
+
+    private void changeTourIndicators(int position) {
+        for (int i = 0; i < tourViewPagerAdapter.getCount(); i++) {
+            if (i == position) {
+                indicators[i].setImageResource(R.drawable.selected_dot_indicator);
+                continue;
+            }
+            indicators[i].setImageDrawable(getResources().getDrawable(R.drawable.unselected_dot_indicator));
+        }
+    }
+
+    private void applyLayoutParams(FrameLayout.LayoutParams layoutParams) {
+        if (mContentBox != null && mContentBox.getLayoutParams() != null) {
+            mContentBox.setLayoutParams(layoutParams);
+        }
     }
 
     /**
@@ -579,7 +674,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
 
         @Override
         public void onGlobalLayout() {
-            updateContentViewLayout();
+            applyLayoutParams();
             updateHighlightTargetLayout();
         }
     }
@@ -587,7 +682,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
 
     /**
      * BUILDER CLASS
-     * Gives us a builder utility class with a fluent API for eaily configuring showcase views
+     * Gives us a builder utility class with a fluent API for eaily configuring showcase screens
      */
     public static class Builder {
         private static final int CIRCLE_SHAPE = 0;
@@ -795,6 +890,11 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
 
         public Builder setSpotlightView(View view) {
             showcaseView.setSpotlightView(view);
+            return this;
+        }
+
+        public Builder setTourView(List<Fragment> screens, Context context, FragmentManager fragmentManager, FrameLayout.LayoutParams layoutParams) {
+            showcaseView.setTourScreens(screens, context, fragmentManager, layoutParams);
             return this;
         }
 
