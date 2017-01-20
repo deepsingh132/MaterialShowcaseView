@@ -18,6 +18,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -45,7 +46,7 @@ import static android.view.Gravity.BOTTOM;
 /**
  * Helper class to show a sequence of showcase screens.
  */
-public class MaterialShowcaseView extends FrameLayout implements View.OnTouchListener, View.OnClickListener {
+public class MaterialShowcaseView extends FrameLayout implements View.OnTouchListener {
 
     private static final String LOG_TAG = "Showcase";
 
@@ -54,17 +55,17 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private Bitmap mBitmap;// = new WeakReference<>(null);
     private Canvas mCanvas;
     private Paint mEraser;
-    private Target mActiveTarget;
+    private Target activeTarget;
     private Target mHighlightTarget;
     private Shape mActiveTargetShape;
     private Shape mHighlightShape;
-    private Target mSpotlightTargetView;
+    private Target spotlightTargetView;
     private int mXPosition;
     private int mYPosition;
     private boolean mWasDismissed = false;
     private int mShapePadding = ShowcaseConfig.DEFAULT_SHAPE_PADDING;
 
-    private View mContentBox;
+    private View parentContentView;
     private int mGravity;
     private int mContentBottomMargin;
     private int mContentTopMargin;
@@ -92,6 +93,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private ImageView[] indicators;
     private boolean shouldShowUserPrompt = false;
     private Position userPromptPosition;
+    private Position spotlightPosition;
     private boolean shouldShowSpotlight = false;
     private boolean showingTourView = false;
 
@@ -137,7 +139,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
 
 
         View contentView = LayoutInflater.from(getContext()).inflate(R.layout.showcase_content, this, true);
-        mContentBox = contentView.findViewById(R.id.content_box);
+        parentContentView = contentView.findViewById(R.id.content_box);
     }
 
 
@@ -200,12 +202,13 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             Paint highLightPaint = new Paint();
             highLightPaint.setStyle(Paint.Style.STROKE);
             highLightPaint.setColor(0xFFFF0000);
+            highLightPaint.setStrokeWidth(3.0f);
             mHighlightShape.draw(mCanvas, highLightPaint, mHighlightTarget.getPoint().x, mHighlightTarget.getPoint().y, 0);
         }
     }
 
     private void checkAndMakeActiveTarget() {
-        if (mActiveTarget == null || mActiveTargetShape == null) {
+        if (activeTarget == null || mActiveTargetShape == null) {
             return;
         }
         if (mEraser == null) {
@@ -242,14 +245,14 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         if (mDismissOnTouch) {
             hide();
         }
-        if (mSpotlightTargetView != null && mSpotlightTargetView.getBounds().contains((int) event.getX(), (int) event.getY())) {
+        if (spotlightTargetView != null && spotlightTargetView.getBounds().contains((int) event.getX(), (int) event.getY())) {
             return true;
         }
         if (isBackgroundViewActive) {
             return false;
         }
 
-        if (mActiveTargetTouchable && mActiveTarget != null && mActiveTarget.getBounds().contains((int) event.getX(), (int) event.getY())) {
+        if (mActiveTargetTouchable && activeTarget != null && activeTarget.getBounds().contains((int) event.getX(), (int) event.getY())) {
             if(mDismissOnTargetTouch){
                 hide();
             }
@@ -290,16 +293,15 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         shouldShowUserPrompt = true;
         userPromptPosition = position;
         clearContentBoxAndAddView(view);
-    }
 
-    /**
-     * Dismiss button clicked
-     *
-     * @param v
-     */
-    @Override
-    public void onClick(View v) {
-        hide();
+        if (position == Position.ABSOLUTE_CENTER) {
+            activeTarget = null;
+            mContentTopMargin = getMeasuredHeight() / 2;
+            mContentLeftMargin = getMeasuredWidth() / 2;
+            mContentBottomMargin = 0;
+            mGravity = Gravity.CENTER;
+            applyLayoutParams();
+        }
     }
 
     /**
@@ -310,7 +312,11 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
      * @param target
      */
     public void setActiveTarget(Target target) {
-        mActiveTarget = target;
+        activeTarget = target;
+    }
+
+    public void setActiveTargetDescriptionView() {
+
     }
 
     private void updateContentViewLayout() {
@@ -320,16 +326,16 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     }
 
     private void updateContentViewLayoutAccordingToActiveTarget() {
-        if (mActiveTarget != null) {
+        if (activeTarget != null) {
 
             // apply the target position
-            Point targetPoint = mActiveTarget.getPoint();
-            Rect targetBounds = mActiveTarget.getBounds();
+            Point targetPoint = activeTarget.getPoint();
+            Rect targetBounds = activeTarget.getBounds();
             setPosition(targetPoint);
 
             int radius = Math.max(targetBounds.height(), targetBounds.width()) / 2;
             if (mActiveTargetShape != null) {
-                mActiveTargetShape.updateTarget(mActiveTarget);
+                mActiveTargetShape.updateTarget(activeTarget);
                 radius = mActiveTargetShape.getHeight() / 2;
             }
 
@@ -339,43 +345,52 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
                 int height = getMeasuredHeight();
                 int yPos = targetPoint.y;
                 int xPos = targetPoint.x;
+                Position position = shouldShowSpotlight ? spotlightPosition : userPromptPosition;
 
-                if (userPromptPosition.equals(Position.CENTER)) {
-                    //content should start from the center of target. So we just need to set the upper margin.
-                    mContentTopMargin = yPos;
-                    mContentBottomMargin = 0;
-                    mContentLeftMargin = xPos - targetBounds.width() / 2;
-                    mGravity = Gravity.TOP;
-                } else if (userPromptPosition.equals(Position.ABOVE)) {
-                    // show user prompt above active target
-                    mContentTopMargin = 0;
-                    mContentBottomMargin = (height - yPos) + radius + mShapePadding;
-                    mContentLeftMargin = 0;
-                    mGravity = BOTTOM;
-                } else if (userPromptPosition.equals(Position.BELOW)) {
-                    // show user prompt below active target
-                    mContentTopMargin = yPos + radius + mShapePadding;
-                    mContentBottomMargin = 0;
-                    mContentLeftMargin = 0;
-                    mGravity = Gravity.TOP;
-                }
+                updateContentLayoutMarginsAccToChildPosition(targetBounds, radius, height, yPos, xPos, position);
             }
         }
     }
 
-    private boolean shouldShowContentBox() {
-        return shouldShowUserPrompt;
+    private void updateContentLayoutMarginsAccToChildPosition(Rect targetBounds, int radius, int height, int yPos, int xPos, Position position) {
+        if (Position.CENTER_OF_ACTIVE_TARGET.equals(position)) {
+            //content should start from the center of target. So we just need to set the upper margin.
+            mContentTopMargin = yPos;
+            mContentBottomMargin = 0;
+            mContentLeftMargin = xPos - targetBounds.width() / 2;
+            mGravity = Gravity.TOP;
+        } else if (Position.ABOVE_OF_ACTIVE_TARGET.equals(position)) {
+            // show user prompt above active target
+            mContentTopMargin = 0;
+            mContentBottomMargin = (height - yPos) + radius + mShapePadding;
+            mContentLeftMargin = 0;
+            mGravity = BOTTOM;
+        } else if (Position.BELOW_OF_ACTIVE_TARGET.equals(position)) {
+            // show user prompt below active target
+            mContentTopMargin = yPos + radius + mShapePadding;
+            mContentBottomMargin = 0;
+            mContentLeftMargin = 0;
+            mGravity = Gravity.TOP;
+        }
     }
 
-    private void clearContentBoxAndAddView(View userPromptView) {
-        ((ViewGroup) mContentBox).removeAllViews();
-        ((ViewGroup) mContentBox).addView(userPromptView);
+    private boolean shouldShowContentBox() {
+        if (shouldShowSpotlight && shouldShowUserPrompt || (!shouldShowSpotlight && !shouldShowUserPrompt)) {
+            Log.w(LOG_TAG, "can't show both spotlight and user prompt at the same time");
+            return false;
+        }
+        return (userPromptPosition != Position.ABSOLUTE_CENTER && spotlightPosition != Position.ABSOLUTE_CENTER);
+    }
+
+    private void clearContentBoxAndAddView(View view) {
+        ((ViewGroup) parentContentView).removeAllViews();
+        ((ViewGroup) parentContentView).addView(view);
     }
 
     private void applyLayoutParams() {
 
-        if (mContentBox != null && mContentBox.getLayoutParams() != null) {
-            FrameLayout.LayoutParams contentLP = (LayoutParams) mContentBox.getLayoutParams();
+        if (parentContentView != null && parentContentView.getLayoutParams() != null) {
+            FrameLayout.LayoutParams contentLP = (LayoutParams) parentContentView.getLayoutParams();
 
             boolean layoutParamsChanged = false;
 
@@ -403,7 +418,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
              * Only apply the layout params if we've actually changed them, otherwise we'll get stuck in a layout loop
              */
             if (layoutParamsChanged)
-                mContentBox.setLayoutParams(contentLP);
+                parentContentView.setLayoutParams(contentLP);
         }
     }
 
@@ -412,16 +427,20 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
      *
      * @param view
      */
-    public void setSpotlightView(View view) {
+    public void setSpotlightView(View view, Position position) {
         shouldShowSpotlight = true;
-        mSpotlightTargetView = new ViewTarget(view);
-        mActiveTarget = null;
+        spotlightTargetView = new ViewTarget(view);
+        spotlightPosition = position;
         clearContentBoxAndAddView(view);
-        mContentTopMargin = getMeasuredHeight() / 2;
-        mContentLeftMargin = getMeasuredWidth() / 2;
-        mContentBottomMargin = 0;
-        mGravity = Gravity.CENTER;
-        applyLayoutParams();
+
+        if (position == Position.ABSOLUTE_CENTER) {
+            activeTarget = null;
+            mContentTopMargin = getMeasuredHeight() / 2;
+            mContentLeftMargin = getMeasuredWidth() / 2;
+            mContentBottomMargin = 0;
+            mGravity = Gravity.CENTER;
+            applyLayoutParams();
+        }
     }
 
     public void setTourScreens(List<Fragment> screens, Context context, FragmentManager fragmentManager,
@@ -434,8 +453,8 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         tourViewPagerAdapter.setTourScreens(screens);
         tourViewPager.setAdapter(tourViewPagerAdapter);
 
-        ((ViewGroup) mContentBox).removeAllViews();
-        ((ViewGroup) mContentBox).addView(tourViewPager);
+        ((ViewGroup) parentContentView).removeAllViews();
+        ((ViewGroup) parentContentView).addView(tourViewPager);
 
         indicatorLayout = getDefaultIndicatorLayoutForTour(context);
         indicators = new ImageView[tourViewPagerAdapter.getCount()];
@@ -448,7 +467,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             indicatorLayout.addView(indicators[i]);
         }
 
-        ((ViewGroup) mContentBox).addView(indicatorLayout);
+        ((ViewGroup) parentContentView).addView(indicatorLayout);
         changeTourIndicators(0);
 
         tourViewPager.addOnPageChangeListener(getTourPageChangeListener());
@@ -456,8 +475,8 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         mGravity = BOTTOM;
         mContentBottomMargin = 100;
         mContentTopMargin = 50;
-        mContentBox.setPadding(50, 200, 50, 200);
-        mContentBox.setBackgroundColor(0xFF000000);
+        parentContentView.setPadding(50, 200, 50, 200);
+        parentContentView.setBackgroundColor(0xFF000000);
         applyLayoutParams();
     }
 
@@ -727,8 +746,8 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             return this;
         }
 
-        public Builder setSpotlightView(View view) {
-            showcaseView.setSpotlightView(view);
+        public Builder setSpotlightView(View view, Position position) {
+            showcaseView.setSpotlightView(view, position);
             return this;
         }
 
@@ -743,14 +762,14 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         }
 
         public MaterialShowcaseView build() {
-            if (showcaseView.mActiveTarget != null && showcaseView.mActiveTargetShape == null) {
+            if (showcaseView.activeTarget != null && showcaseView.mActiveTargetShape == null) {
                 switch (shapeType) {
                     case RECTANGLE_SHAPE: {
-                        showcaseView.setActiveTargetShape(new RectangleShape(showcaseView.mActiveTarget.getBounds(), fullWidth));
+                        showcaseView.setActiveTargetShape(new RectangleShape(showcaseView.activeTarget.getBounds(), fullWidth));
                         break;
                     }
                     case CIRCLE_SHAPE: {
-                        showcaseView.setActiveTargetShape(new CircleShape(showcaseView.mActiveTarget));
+                        showcaseView.setActiveTargetShape(new CircleShape(showcaseView.activeTarget));
                         break;
                     }
                     case NO_SHAPE: {
