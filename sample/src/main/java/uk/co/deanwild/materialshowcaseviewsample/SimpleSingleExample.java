@@ -23,6 +23,8 @@ import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
 import uk.co.deanwild.materialshowcaseview.TourFragment;
 import uk.co.deanwild.materialshowcaseview.TourViewPager;
 import uk.co.deanwild.materialshowcaseview.TourViewPagerAdapter;
+import uk.co.deanwild.materialshowcaseview.model.Position;
+import uk.co.deanwild.materialshowcaseview.shape.RectangleShape;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -72,13 +74,28 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
         tourViewPagerAdapter.setTourScreens(getCustomTourScreens());
         tourViewPager.setAdapter(tourViewPagerAdapter);
         new MaterialShowcaseView.Builder(this)
-                .setSpotlightView(getCustomViewGroup())
+                .setActiveTarget(mButtonShow)
+                .setActiveTargetTouchable(true)
+                .setActiveTargetShape(new RectangleShape(20, 20))
+                .setHightlightTarget(mButtonShow)
+                .setHighlightShape(new RectangleShape(20, 20))
+                .setUserPrompt(getCustomActionPrompt(), Position.CENTER)
                 .setDelay(withDelay) // optional but starting animations immediately in onCreate can make them choppy
                 .show();
     }
 
     @NonNull
-    private TextView getCustomContentTextView() {
+    private View getCustomActionPrompt() {
+        LinearLayout linearLayout = new LinearLayout(this);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        linearLayout.addView(getCustomImageView());
+        linearLayout.addView(getCustomTextView());
+        return linearLayout;
+
+    }
+
+    @NonNull
+    private TextView getCustomTextView() {
         TextView textView = new TextView(this);
         textView.setText("This is a custom text view");
         textView.setTextColor(ContextCompat.getColor(this, R.color.green));
@@ -93,7 +110,7 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
     @NonNull
     private ImageView getCustomImageView() {
         ImageView imageView = new ImageView(this);
-        imageView.setImageResource(R.mipmap.ic_launcher);
+        imageView.setImageResource(R.drawable.swipe_hand_add_money);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
         layoutParams.gravity = Gravity.CENTER;
         layoutParams.setMargins(30, 30, 30, 30);
@@ -115,7 +132,7 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
         linearLayout.setLayoutParams(layoutParams);
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
         linearLayout.setBackgroundColor(0xFF000000);
-        linearLayout.addView(getCustomContentTextView());
+        linearLayout.addView(getCustomTextView());
         linearLayout.addView(getCustomImageView());
         return linearLayout;
     }

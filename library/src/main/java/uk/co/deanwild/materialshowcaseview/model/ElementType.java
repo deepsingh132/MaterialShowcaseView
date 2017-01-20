@@ -6,5 +6,5 @@ public enum ElementType {
     HIGHLIGHT_TARGET,
     TOUR,
     SPOTLIGHT, // will be shown in the center only for now
-    ACTION_PROMPT
+    USER_PROMPT
 }

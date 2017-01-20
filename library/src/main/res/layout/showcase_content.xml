@@ -7,46 +7,4 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <ImageView
-        android:id="@+id/iv_action"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/swipe_hand_add_money"
-        android:visibility="gone"
-        android:layout_margin="20dp"/>
-
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@android:color/white"
-        android:paddingLeft="5dp"
-        android:textSize="30dp"
-        android:visibility="gone"
-        android:layout_marginBottom="15dp" />
-
-    <TextView
-        android:id="@+id/tv_content"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@android:color/white"
-        android:visibility="gone"
-        android:paddingLeft="5dp"
-        android:textSize="20dp" />
-
-    <TextView
-        android:id="@+id/tv_dismiss"
-        android:background="?android:attr/selectableItemBackground"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:clickable="true"
-        android:paddingBottom="10dp"
-        android:paddingTop="10dp"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:textColor="@android:color/white"
-        android:textSize="22dp"
-        android:visibility="gone" />
-
 </LinearLayout>

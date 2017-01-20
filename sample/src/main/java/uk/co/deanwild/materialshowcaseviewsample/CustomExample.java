@@ -46,9 +46,6 @@ public class CustomExample extends AppCompatActivity implements View.OnClickList
             new MaterialShowcaseView.Builder(this)
                     .setActiveTarget(view)
                     .setActiveTargetShapePadding(96)
-                    .setDismissText("GOT IT")
-                    .setContentText("Example of how to setup a MaterialShowcaseView for menu items in action bar.")
-                    .setContentTextColor(getResources().getColor(R.color.green))
                     .setMaskColour(getResources().getColor(R.color.purple))
                     .show();
         }
@@ -74,9 +71,7 @@ public class CustomExample extends AppCompatActivity implements View.OnClickList
     private void presentShowcaseView(int withDelay) {
         new MaterialShowcaseView.Builder(this)
                 .setActiveTarget(mButtonShow)
-                .setContentText("This is some amazing feature you should know about")
                 .setDismissOnTouch(true)
-                .setContentTextColor(getResources().getColor(R.color.green))
                 .setMaskColour(getResources().getColor(R.color.purple))
                 .setDelay(withDelay) // optional but starting animations immediately in onCreate can make them choppy
                 .singleUse(SHOWCASE_ID) // provide a unique ID used to ensure it is only shown once
