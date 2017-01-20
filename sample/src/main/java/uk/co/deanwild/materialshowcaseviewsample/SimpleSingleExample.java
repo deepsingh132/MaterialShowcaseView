@@ -72,8 +72,7 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
         tourViewPagerAdapter.setTourScreens(getCustomTourScreens());
         tourViewPager.setAdapter(tourViewPagerAdapter);
         new MaterialShowcaseView.Builder(this)
-                //.setSpotlightView(tourViewPager)
-                .setTourView(getCustomTourScreens(), this, getSupportFragmentManager(), getLayoutParamsForTour())
+                .setSpotlightView(getCustomViewGroup())
                 .setDelay(withDelay) // optional but starting animations immediately in onCreate can make them choppy
                 .show();
     }
@@ -83,7 +82,6 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
         TextView textView = new TextView(this);
         textView.setText("This is a custom text view");
         textView.setTextColor(ContextCompat.getColor(this, R.color.green));
-        textView.setBackgroundColor(ContextCompat.getColor(this, R.color.darkred));
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
         layoutParams.gravity = Gravity.CENTER;
         layoutParams.setMargins(30, 30, 30, 30);
@@ -116,7 +114,7 @@ public class SimpleSingleExample extends AppCompatActivity implements View.OnCli
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
         linearLayout.setLayoutParams(layoutParams);
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-        linearLayout.setBackgroundColor(0xFFCCCCCC);
+        linearLayout.setBackgroundColor(0xFF000000);
         linearLayout.addView(getCustomContentTextView());
         linearLayout.addView(getCustomImageView());
         return linearLayout;

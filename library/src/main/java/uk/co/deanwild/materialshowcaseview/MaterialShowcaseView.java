@@ -515,12 +515,6 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         }
     }
 
-    private void applyLayoutParams(FrameLayout.LayoutParams layoutParams) {
-        if (mContentBox != null && mContentBox.getLayoutParams() != null) {
-            mContentBox.setLayoutParams(layoutParams);
-        }
-    }
-
     /**
      * SETTERS
      */
