@@ -97,6 +97,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private Position spotlightPosition;
     private boolean shouldShowSpotlight = false;
     private boolean showingTourView = false;
+    private ITargetTouchListener actionTargetTouchListener;
 
     public MaterialShowcaseView(Context context) {
         super(context);
@@ -254,12 +255,19 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         }
 
         if (mActiveTargetTouchable && activeTarget != null && activeTarget.getBounds().contains((int) event.getX(), (int) event.getY())) {
+            fireActiveTargetTouchListener();
             if(mDismissOnTargetTouch){
                 hide();
             }
             return false;
         }
         return true;
+    }
+
+    private void fireActiveTargetTouchListener() {
+        if (actionTargetTouchListener != null) {
+            actionTargetTouchListener.onTargetTouched(activeTarget);
+        }
     }
 
 
@@ -538,6 +546,10 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         mYPosition = y;
     }
 
+    public void setActionTargetTouchListener(ITargetTouchListener targetTouchListener) {
+        actionTargetTouchListener = targetTouchListener;
+    }
+
     private void setActiveTargetShapePadding(int padding) {
         mShapePadding = padding;
     }
@@ -763,6 +775,11 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
 
         public Builder setUserPrompt(View view, Position position) {
             showcaseView.setUserPrompt(view, position);
+            return this;
+        }
+
+        public Builder setActiveTargetTouchListener(ITargetTouchListener activeTargetTouchListener) {
+            showcaseView.setActionTargetTouchListener(activeTargetTouchListener);
             return this;
         }
 
