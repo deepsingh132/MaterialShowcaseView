@@ -18,7 +18,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -363,20 +362,19 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
             // show user prompt above active target
             mContentTopMargin = 0;
             mContentBottomMargin = (height - yPos) + radius + mShapePadding;
-            mContentLeftMargin = 0;
+            mContentLeftMargin = xPos - targetBounds.width() / 2;
             mGravity = BOTTOM;
         } else if (Position.BELOW_OF_ACTIVE_TARGET.equals(position)) {
             // show user prompt below active target
             mContentTopMargin = yPos + radius + mShapePadding;
             mContentBottomMargin = 0;
-            mContentLeftMargin = 0;
+            mContentLeftMargin = xPos - targetBounds.width() / 2;
             mGravity = Gravity.TOP;
         }
     }
 
     private boolean shouldShowContentBox() {
         if (shouldShowSpotlight && shouldShowUserPrompt || (!shouldShowSpotlight && !shouldShowUserPrompt)) {
-            Log.w(LOG_TAG, "can't show both spotlight and user prompt at the same time");
             return false;
         }
         return (userPromptPosition != Position.ABSOLUTE_CENTER && spotlightPosition != Position.ABSOLUTE_CENTER);
