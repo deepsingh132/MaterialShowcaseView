@@ -31,9 +31,4 @@ public class TourViewPagerAdapter extends FragmentPagerAdapter {
     public int getCount() {
         return screens.size();
     }
-
-    @Override
-    public CharSequence getPageTitle(int position) {
-        return ((TourFragment) screens.get(position)).getPageTitle();
-    }
 }
