@@ -39,5 +39,9 @@ public class ViewTarget implements Target {
         );
     }
 
+    public View getView() {
+        return mView;
+    }
+
 
 }

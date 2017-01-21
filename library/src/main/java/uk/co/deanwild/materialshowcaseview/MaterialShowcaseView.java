@@ -13,6 +13,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
@@ -59,6 +60,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     private Shape mActiveTargetShape;
     private Shape mHighlightShape;
     private Target spotlightTargetView;
+    private Target userPromptTargetView;
     private int mXPosition;
     private int mYPosition;
     private boolean mWasDismissed = false;
@@ -291,15 +293,22 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
     public void setUserPrompt(View view, Position position) {
         shouldShowUserPrompt = true;
         userPromptPosition = position;
+        userPromptTargetView = new ViewTarget(view);
         clearContentBoxAndAddView(view);
 
-        if (position == Position.ABSOLUTE_CENTER) {
+        if (isAbsolutePosition(position)) {
             activeTarget = null;
-            mContentTopMargin = getMeasuredHeight() / 2;
-            mContentLeftMargin = getMeasuredWidth() / 2;
-            mContentBottomMargin = 0;
-            mGravity = Gravity.CENTER;
-            applyLayoutParams();
+        }
+    }
+
+    public void setSpotlightView(View view, Position position) {
+        shouldShowSpotlight = true;
+        spotlightTargetView = new ViewTarget(view);
+        spotlightPosition = position;
+        clearContentBoxAndAddView(view);
+
+        if (isAbsolutePosition(position)) {
+            activeTarget = null;
         }
     }
 
@@ -314,14 +323,26 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         activeTarget = target;
     }
 
-    public void setActiveTargetDescriptionView() {
-
+    private void updateContentViewLayout() {
+        if (activeTarget != null) {
+            updateContentViewLayoutAccordingToActiveTarget();
+        } else if (shouldShowSpotlight || shouldShowUserPrompt) {
+            Position position = shouldShowSpotlight ? spotlightPosition : userPromptPosition;
+            Target target = shouldShowSpotlight ? spotlightTargetView : userPromptTargetView;
+            updateContentViewAccordingToAbsoluteView(position, target);
+        }
+        applyLayoutParams();
     }
 
-    private void updateContentViewLayout() {
-        updateContentViewLayoutAccordingToActiveTarget();
-
-        applyLayoutParams();
+    private void updateContentViewAccordingToAbsoluteView(Position position, @NonNull Target target) {
+        View view = ((ViewTarget) target).getView();
+        mContentLeftMargin = (getMeasuredWidth() - target.getBounds().width()) / 2 - view.getPaddingLeft();
+        mContentBottomMargin = 0;
+        if (position == Position.ABSOLUTE_CENTER) {
+            mContentTopMargin = (getMeasuredHeight() - target.getBounds().height()) / 2;
+        } else if (position == Position.ABSOLUTE_TOP) {
+            mContentTopMargin = getMeasuredHeight() / 5 - (target.getBounds().height() / 2);
+        }
     }
 
     private void updateContentViewLayoutAccordingToActiveTarget() {
@@ -377,7 +398,7 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         if (shouldShowSpotlight && shouldShowUserPrompt || (!shouldShowSpotlight && !shouldShowUserPrompt)) {
             return false;
         }
-        return (userPromptPosition != Position.ABSOLUTE_CENTER && spotlightPosition != Position.ABSOLUTE_CENTER);
+        return (!isAbsolutePosition(userPromptPosition) && !isAbsolutePosition(spotlightPosition));
     }
 
     private void clearContentBoxAndAddView(View view) {
@@ -420,25 +441,11 @@ public class MaterialShowcaseView extends FrameLayout implements View.OnTouchLis
         }
     }
 
-    /***
-     * for now, if you are showing spotlight, you can't show any other view
-     *
-     * @param view
-     */
-    public void setSpotlightView(View view, Position position) {
-        shouldShowSpotlight = true;
-        spotlightTargetView = new ViewTarget(view);
-        spotlightPosition = position;
-        clearContentBoxAndAddView(view);
-
-        if (position == Position.ABSOLUTE_CENTER) {
-            activeTarget = null;
-            mContentTopMargin = getMeasuredHeight() / 2;
-            mContentLeftMargin = getMeasuredWidth() / 2;
-            mContentBottomMargin = 0;
-            mGravity = Gravity.CENTER;
-            applyLayoutParams();
+    private boolean isAbsolutePosition(Position position) {
+        if (position == null || position.name() == null) {
+            return false;
         }
+        return position.name().toLowerCase().startsWith("absolute");
     }
 
     public void setTourScreens(List<Fragment> screens, Context context, FragmentManager fragmentManager,
