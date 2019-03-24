@@ -3,9 +3,9 @@ Originally forked from [deano2390/MaterialShowcaseView](https://github.com/deano
 ### Changes that I've done:
 
 - New type of elements:
-  - Spotlight ( a view in the center which disables background touches)
-  - Tour ( a viewpager tour at the bottom)
-  - Notification ( a view at the top with option to dismiss)
+  - Spotlight : a view in the center, on top of the current view hierarchy which disables background touches
+  - Tour : a viewpager tour at the bottom
+  - Notification : a view at the top with option to dismiss
 - Added listener support for elements so that consumer app can act on it.
 - Added flexibility for consumer to add it's own textviews.
 - Refactored a lot of things (removed hungarian naming convention ! ) 
@@ -13,7 +13,7 @@ Originally forked from [deano2390/MaterialShowcaseView](https://github.com/deano
 
 
 ### Blog
-I've also written a blog explaining how the original Showcase library works : https://1bucketlist.blogspot.com/2017/03/android-material-showcase-view-1.html. Do have a look and let me know if you have any comments.
+I've also written a blog explaining how the original Showcase library works : https://medium.com/@yashgirdhar/android-material-showcase-view-part-1-22abd5c65b85. Do have a look and let me know if you have any comments.
 
 Feel free to ping me in case of any doubts.
 
