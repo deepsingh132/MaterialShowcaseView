@@ -1,6 +1,6 @@
 Originally forked from [deano2390/MaterialShowcaseView](https://github.com/deano2390/MaterialShowcaseView). I've used this library for creating a Education Framework for Newly Onboarded Users in [Zeta Android App](https://play.google.com/store/apps/details?id=in.zeta.android).
 
-Changes that I've done:
+### Changes that I've done:
 
 - New type of elements:
   - Spotlight ( a view in the center which disables background touches)
@@ -10,6 +10,10 @@ Changes that I've done:
 - Added flexibility for consumer to add it's own textviews.
 - Refactored a lot of things (removed hungarian naming convention ! ) 
 - Some UI tweaks such as support for higlighting.
+
+
+### Blog
+I've also written a blog explaining how the original Showcase library works : https://1bucketlist.blogspot.com/2017/03/android-material-showcase-view-1.html. Do have a look and let me know if you have any comments.
 
 Feel free to ping me in case of any doubts.
 
